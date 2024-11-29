@@ -27,8 +27,8 @@ from tld import get_tld
 from docopt import docopt
 
 
-def appendToHostsFile(url, dryRun):
-    f = furl(url)
+def appendToHostsFile(urlOrHost, dryRun):
+    f = furl(urlOrHost)
     host = f.host
     if host is None:
         host = url

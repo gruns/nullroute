@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+'''
+nullroute - Null route the provided URL or domain in /etc/hosts
+
+Usage:
+  nullroute <urlOrDomain> [--dry-run]
+
+Arguments:
+  <urlOrDomain>  The URL or domain to null route by appending it to /etc/hosts.
+  --dry-run      Don't write to /etc/hosts.
+
+Options:
+  -h --help     Show this screen.
+
+Example:
+  nullroute example.com
+  nullroute https://example.com/
+'''
+
+import shlex
+import subprocess
+
+from furl import furl
+from tld import get_tld
+from docopt import docopt
+
+
+def appendToHostsFile(url, dryRun):
+    f = furl(url)
+    host = f.host
+    if host is None:
+        host = url
+    host = host.lstrip('www.')
+
+    hosts = [host]
+    t = get_tld(host, as_object=True, fix_protocol=True)
+    if not t.subdomain:
+        hosts.append(f'www.{host}')
+
+    s = '\n'.join(f'0.0.0.0   {host}' for host in hosts)
+    if not dryRun:
+        with open('/etc/hosts', 'a') as f:
+            f.write(s)
+
+    command = 'tail -n 6 /etc/hosts'
+    tail = subprocess.check_output(shlex.split(command), text=True)
+    print(f'> {command}')
+    print(tail)
+    hostsQuoted = [f'"{host}"' for host in hosts]
+    print(f'Null routed {" and ".join(hostsQuoted)} in /etc/hosts.')
+
+
+def main():
+    args = docopt(__doc__)
+    dryRun = args['--dry-run']
+    urlOrHost = args['<urlOrDomain>']
+    
+    appendToHostsFile(urlOrHost, dryRun)
+
+    
+if __name__ == '__main__':
+    main()

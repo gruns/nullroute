@@ -31,7 +31,7 @@ def appendToHostsFile(urlOrHost, dryRun):
     f = furl(urlOrHost)
     host = f.host
     if host is None:
-        host = url
+        host = urlOrHost
     host = host.lstrip('www.')
 
     hosts = [host]

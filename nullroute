@@ -40,6 +40,7 @@ def appendToHostsFile(urlOrHost, dryRun):
         hosts.append(f'www.{host}')
 
     s = '\n'.join(f'0.0.0.0   {host}' for host in hosts)
+    s += '\n'
     if not dryRun:
         with open('/etc/hosts', 'a') as f:
             f.write(s)
